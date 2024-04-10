@@ -1,52 +1,128 @@
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const UserSchema = require('../models/User');
-const jwt = require('jsonwebtoken')
+const authController = require('../controllers/authController');
+const auth = new authController();
 
-class UserController {
-
-    constructor(){
-        this.jwtSecret = process.env.JWT_SECRET || '';
-
-        // Bindear el método para asegurarse de que 'this' apunte a la instancia de UserController
-        this.validateToken = this.validateToken.bind(this);
-    }
-
-    async login(email, password){
-        try {
-            // Buscar el usuario con el email
-            const user = await UserSchema.findOne({ 'email' : email });
-            if(!user){
-                return { "status": "error", "message": "El usuario no existe." };
-            }
-            
-            // Comparar la contraseña con la que tengo en la base de datos
-            const passwordMatch = await bcrypt.compare(password, user.password);
-            if(!passwordMatch){
-                return { "status": "error", "message": "Contraseña incorrecta"}
-            }
-
-            const token = jwt.sign({ userId: user._id, email: user.email}, this.jwtSecret, {expiresIn: '1y'});
-
-            return {"status": "success", "token": token}
-        } catch (error) {
-            console.log(error)
-            return { "status": "error", "message": "Error al iniciar sesión"}
-        }
-    }
-    validateToken(req, res, next) {
-        const bearerToken = req.headers['authorization']
-        if(!bearerToken){
-            return res.status(401).json({ "message": "Token no existente"});
-        }
-        const token = bearerToken.startsWith("Bearer ") ? bearerToken.slice(7) : bearerToken;
-        jwt.verify(token, this.jwtSecret, (err, decoded) => {
-            if(err){
-                return res.status(401).json({ "message": "Token invalido"}); 
-            }
-            req.userId = decoded.userId;
-            next();
-        })   
-    }
+// Get all user
+exports.getAllUsers = async (req, res, next) => {
+    //Traer todos los usuarios
+    let users = await User.find(); 
+    res.json(users)
 }
 
-module.exports = UserController; 
+// Get user
+exports.getOneUser = async (req, res, next) => {
+    //Traer un usuario especifico pasando el ID
+    var id = req.params.id
+    let user = await User.findById(id); 
+    res.json(user)
+}
+
+// Create user
+exports.createUser = async (req, res, next) => { console.log("here")
+    const hashedPassword = await bcrypt.hash(req.body.password, 10)
+
+    // Verifica si existe otra casa con el mismo código
+    const userFoundById = await User.findOne({id: req.body.id})
+    if(userFoundById){
+        return res.status(400).json({"status" : "error", "message" :"La identificación ya fue registrada."})      
+    }
+
+    const userFoundByEmail = await User.findOne({email: req.body.email})
+    if(userFoundByEmail){
+        return res.status(400).json({"status" : "error", "message" :"El e-mail ya fue registrado."})      
+    }
+
+    let user = User({
+        name: req.body.name,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        id: req.body.id,
+        password: hashedPassword
+    })
+
+    user.save().then((result) => {
+        res.send(result)
+    }).catch((err) => {
+        console.log(err);
+        if(err.code == 11000){
+            res.send({"status" : "error", "message" :"El correo ya fue registrado"})      
+        }else{
+            res.send({"status" : "error", "message" :"Error almacenando la informacion"})      
+        }
+    })
+}
+
+// Editar usuario
+exports.editUser = async (req, res, next) => {
+    var id = req.params.id
+    
+    let hashedPassword; 
+    if(req.body.password){
+        hashedPassword = await bcrypt.hash(req.body.password, 10)
+    }
+
+    // Cuando viene por el body se usa body
+    var updateUser = {
+        name: req.body.name,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        password: hashedPassword, 
+        id: req.body.id
+    }
+
+    User.findByIdAndUpdate(id, updateUser, {new: true}).then((result) => {
+        res.send(result)
+    }).catch((error) => {
+        console.log(error)
+        res.send("Error actualizando el registro")
+    })
+}
+
+// Delete user
+exports.deleteUser = (req, res, next) => {
+    var id = req.params.id
+
+    //Puedo establecer cualquier parametro para eliminar
+    User.deleteOne({_id: id}).then(() => {
+        res.json({"status": "success", "message": "User deleted successfully"})
+    }).catch((error) => {
+        console.log(error)
+        res.json({"status": "failed", "message": "Error deleting user"})
+    })
+}
+
+// Login user 
+exports.login = (req, res, next) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    auth.login(email, password).then((result) => {
+        if(result.status == "error"){
+            res.status(401).send(result)
+        }else{
+            res.send(result)
+        }
+    })
+}
+
+// Update avatar
+exports.updateAvatar = (req, res, next) => {
+    if(!req.file){
+        return res.status(400).send({ "status": "error", "message": "No se proporcionó ningun archivo" })
+    }
+
+    var id = req.params.id;
+
+    var updateUser = {
+        avatar
+        : req.file.path, 
+    }
+
+    User.findByIdAndUpdate(id, updateUser, {new: true}).then((result) => {
+        return res.send(result)
+    }).catch((error) => {
+        console.log(error)
+        return res.status(400).send({ "status": "error", "message": "Error actualizando el registro" })
+    })
+}
