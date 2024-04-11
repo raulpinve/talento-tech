@@ -45,6 +45,6 @@ router.delete('/user/:id', auth.validateToken, userController.deleteUser)
 router.post('/login', userController.login)
 
 // Subir avatar 
-router.post('/upload/:id/user', auth.validateToken, upload.single('file'), userController.updateAvatar)
+router.post('/upload/:id/user', userController.updateAvatar)
 
 module.exports = router

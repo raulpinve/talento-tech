@@ -19,7 +19,7 @@ exports.getOneUser = async (req, res, next) => {
 }
 
 // Create user
-exports.createUser = async (req, res, next) => { console.log("here")
+exports.createUser = async (req, res, next) => { 
     const hashedPassword = await bcrypt.hash(req.body.password, 10)
 
     // Verifica si existe otra casa con el mismo código
@@ -106,23 +106,36 @@ exports.login = (req, res, next) => {
     })
 }
 
-// Update avatar
+// Edit Avatar 
 exports.updateAvatar = (req, res, next) => {
-    if(!req.file){
-        return res.status(400).send({ "status": "error", "message": "No se proporcionó ningun archivo" })
-    }
+    var id = req.params.id
 
-    var id = req.params.id;
-
-    var updateUser = {
-        avatar
-        : req.file.path, 
-    }
-
-    User.findByIdAndUpdate(id, updateUser, {new: true}).then((result) => {
+    //Puedo establecer cualquier parametro para eliminar
+    User.findByIdAndUpdate(id, req.body, {new: true}).then((result) => {
         return res.send(result)
     }).catch((error) => {
         console.log(error)
         return res.status(400).send({ "status": "error", "message": "Error actualizando el registro" })
     })
 }
+
+// Update avatar
+// exports.updateAvatar = (req, res, next) => {
+//     if(!req.file){
+//         return res.status(400).send({ "status": "error", "message": "No se proporcionó ningun archivo" })
+//     }
+
+//     var id = req.params.id;
+
+//     var updateUser = {
+//         avatar
+//         : req.file.path, 
+//     }
+
+//     User.findByIdAndUpdate(id, updateUser, {new: true}).then((result) => {
+//         return res.send(result)
+//     }).catch((error) => {
+//         console.log(error)
+//         return res.status(400).send({ "status": "error", "message": "Error actualizando el registro" })
+//     })
+// }

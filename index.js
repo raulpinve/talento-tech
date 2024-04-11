@@ -5,10 +5,13 @@ const port = process.env.PORT || 3000; // Escuchar la ejecucion del servidor
 require('dotenv').config(); // Obtenemos las variables de entorno
 const socket = require('socket.io'); // Importamos la libreria socket.io
 const http = require('http').Server(app);
+const path = require('path')
 
 // !NOTE: Disabled web socket
 // const io = socket(http);
 const cors = require('cors')
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 /** Importamos la libreria server de graphql */
 const { createYoga } = require('graphql-yoga')

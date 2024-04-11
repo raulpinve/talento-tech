@@ -95,7 +95,7 @@ const HouseSchema = new mongoose.Schema({
     }, 
     image: {
         type: String, 
-        default: "uploads/default/image-default.jpg"        
+        default: "https://5xhestapzxosdhkf.public.blob.vercel-storage.com/default/image-default-VstYKDNdxDzi1FY1brXHVKT7R2mD6R.jpg"        
     }
 })
 

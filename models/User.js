@@ -33,7 +33,7 @@ const UserSchema = new mongoose.Schema({
     }, 
     avatar: {
         type: String, 
-        default: "uploads/default/image-user-default.jpg", 
+        default: "https://5xhestapzxosdhkf.public.blob.vercel-storage.com/default/image-user-default-LVdZSShpIgelcxZ8vpBI4aqeR4WByP.jpg", 
         // required: true
     }
 })

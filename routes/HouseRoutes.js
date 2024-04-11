@@ -40,6 +40,6 @@ router.patch('/house/:id', auth.validateToken, houseController.editHouse)
 router.delete('/house/:id', auth.validateToken, houseController.deleteHouse)
 
 // Update avatar
-router.post('/upload/:id/house', auth.validateToken, upload.single('file'), houseController.updateImage)
+router.post('/upload/:id/house', auth.validateToken, houseController.updateImage)
 
 module.exports = router

@@ -137,18 +137,14 @@ exports.deleteHouse = (req, res, next) => {
 
 // Update avatar 
 exports.updateImage = (req, res, next) => {
-    if(!req.file){
-        return res.status(400).send({ "status": "error", "message": "No se proporcionó ningun archivo" })
-    }
-
     var id = req.params.id;
-    var updateHouse = {
-        image: req.file.path, 
-    }
-    House.findByIdAndUpdate(id, updateHouse, {new: true}).then((result) => {
+
+    House.findByIdAndUpdate(id,  req.body, {new: true}).then((result) => {
         return res.json({"status": "success", "message": "Archivo subido correctamente."})
     }).catch((error) => {
         console.log(error)
         return res.status(400).json({ "status": "error", "message": "Error al subir la imagen de la casa" })
     })
+
+    var id = req.params.id
 }
