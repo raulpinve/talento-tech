@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const authController = require('../controllers/authController');
+const userController = require('../controllers/userController')
+
 const auth = new authController();
 
 const configMulterUserAvatar = {
@@ -23,7 +25,7 @@ const configMulterUserAvatar = {
 }
 const upload = multer(configMulterUserAvatar)
 
-const userController = require('../controllers/userController')
+
 
 // Get all the users
 router.get('/user', auth.validateToken, userController.getAllUsers)
